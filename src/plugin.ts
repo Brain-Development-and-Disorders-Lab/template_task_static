@@ -1,15 +1,21 @@
-// Source code for the jsPsych plugin
+/**
+ * @file Plugin file containing code establishing a jsPsych plugin for the
+ * template task. Configures data storage and displays a React screen
+ * to the participant. Handles the end of the trial by storing data and
+ * cleaning up the display.
+ * @author Henry Burgess <henry.burgess@wustl.edu>
+ */
 
 // Logging library
-import consola from 'consola';
+import consola from "consola";
 
 // Core modules
-import {Configuration} from './Configuration';
+import { Configuration } from "src/configuration";
 
 jsPsych.plugins[Configuration.studyName] = (() => {
   const plugin = {
     info: {},
-    trial: (displayElement: HTMLElement, trial: Trial) => {
+    trial: (displayElement: HTMLElement, trial: any) => {
       // Debugging info if this is reached
       consola.debug(`displayElement:`, displayElement);
       consola.debug(`trial:`, trial);
@@ -24,11 +30,11 @@ jsPsych.plugins[Configuration.studyName] = (() => {
     parameters: {},
   };
 
-  plugin.trial = (displayElement: HTMLElement, trial: Trial) => {
+  plugin.trial = (displayElement: HTMLElement, trial: any) => {
     const Experiment = window.Experiment;
 
     // Setup the trial data to be stored
-    const trialData: Data = {
+    const trialData = {
       trial: trial.trial,
       trialDuration: 0,
     };
@@ -40,25 +46,21 @@ jsPsych.plugins[Configuration.studyName] = (() => {
      * Function to finish the trial and unmount React components
      * cleanly if required
      */
-    function finishTrial(): void {
+    const finishTrial = (): void => {
       // Record the total reaction time
-      const endTime = performance.now();
-      const duration = endTime - startTime;
+      const duration = performance.now() - startTime;
       trialData.trialDuration = duration;
 
-      // If the next trial isn't React-based, clean up React
-      if (trial.clearScreen === true) {
-        ReactDOM.unmountComponentAtNode(displayElement);
-      }
-
       // Re-enable keyboard actions
-      document.removeEventListener('keydown', () => {
+      document.removeEventListener("keydown", () => {
         return false;
       });
 
       // Finish the jsPsych trial
       jsPsych.finishTrial(trialData);
-    }
+    };
+
+    // Custom plugin implementation should be placed here
   };
 
   return plugin;
